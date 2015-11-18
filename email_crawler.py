@@ -21,7 +21,7 @@ url_regex = re.compile('<a\s.*?href=[\'"](.*?)[\'"].*?>')
 # url_regex = re.compile('<a\s(?:.*?\s)*?href=[\'"](.*?)[\'"].*?>')
 
 # Maximum number of search results to start the crawl
-MAX_SEARCH_RESULTS = 2000
+MAX_SEARCH_RESULTS = 1000
 
 EMAILS_FILENAME = 'data/emails.csv'
 DOMAINS_FILENAME = 'data/domains.csv'
@@ -75,10 +75,10 @@ def crawl(keywords):
     data = retrieve_html(url)
 #   print("data: \n%s" % data)
     for url in yelp_url_regex.findall(data):
-
       yelp_page = retrieve_html("http://www.yelp.com/biz/" + url)
-      if url:
-        db.enqueue(url[0])
+      biz_url = yelp_page_regex.findall(yelp_page)
+      if biz_url:
+        db.enqueue('http://' + biz_url[0])
 
 # Step 2: Crawl each of the search result
 # We search till level 2 deep
@@ -110,7 +110,7 @@ def retrieve_html(url):
   status = 0
   try:
     logger.info("Crawling %s" % url)
-    request = urllib2.urlopen(req)
+    request = urllib2.urlopen(req, timeout=5)
   except urllib2.URLError, e:
     logger.error("Exception at url: %s\n%s" % (url, e))
   except urllib2.HTTPError, e:
@@ -147,6 +147,7 @@ def find_emails_2_level_deep(url):
 
     link_set = find_links_in_html_with_same_hostname(url, html)
     for link in link_set:
+      print link
       if url not in link:
         continue
       # Crawl them right away!
@@ -199,6 +200,19 @@ def find_links_in_html_with_same_hostname(url, html):
       pass
 
   return link_set
+locations = [
+    'dallas,tx,usa',
+    'columbus,+OH,+USA',
+    'nashville,+TN,+USA',
+    'indianapolis,+IN,+USA',
+    'louisville,+IN,+USA',
+    'houston,+TX,+USA',
+    'st+louis,+MO,+USA',
+    'Oklahoma+City,+OK,+USA',
+    'phoenix,+AZ,+USA',
+    'portland,+OR,+USA',
+    'tampa,FL,USA'
+    ]
 
 if __name__ == "__main__":
   import sys
@@ -228,7 +242,8 @@ if __name__ == "__main__":
       logger.info("="*40)
     else:
       # Crawl the supplied keywords!
-      crawl(arg)
+      for l in locations:
+        crawl(l)
 
   except KeyboardInterrupt:
     logger.error("Stopping (KeyboardInterrupt)")
