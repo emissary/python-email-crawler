@@ -12,16 +12,16 @@ from database import CrawlerDb
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("crawler_logger")
 
-google_adurl_regex = re.compile('adurl=(.*?)"')
-google_url_regex = re.compile('url\?q=(.*?)&amp;sa=')
+yelp_url_regex = re.compile('class="biz-name" href="/biz/(.*?)"')
 email_regex = re.compile('([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})', re.IGNORECASE)
+yelp_page_regex = re.compile('<a.*?url=http%3A%2F%2F(.*?)[&%]')
 url_regex = re.compile('<a\s.*?href=[\'"](.*?)[\'"].*?>')
 # Below url_regex will run into 'Castrophic Backtracking'!
 # http://stackoverflow.com/questions/8010005/python-re-infinite-execution
 # url_regex = re.compile('<a\s(?:.*?\s)*?href=[\'"](.*?)[\'"].*?>')
 
 # Maximum number of search results to start the crawl
-MAX_SEARCH_RESULTS = 200
+MAX_SEARCH_RESULTS = 2000
 
 EMAILS_FILENAME = 'data/emails.csv'
 DOMAINS_FILENAME = 'data/domains.csv'
@@ -69,19 +69,16 @@ def crawl(keywords):
 # Next page: https://www.google.com/search?q=singapore+web+development&start=10
 # Google search results are paged with 10 urls each. There are also adurls
 
-  for d in directory_domains:
-    keywords = keywords + ' -site:' + d
-
   for page_index in range(0, MAX_SEARCH_RESULTS, 10):
 
-    query = {'q': keywords}
-    url = 'http://www.google.com/search?' + urllib.urlencode(query) + '&start=' + str(page_index)
+    url = 'http://www.yelp.com/search?find_desc=dentist&find_loc=' + keywords + '&start=' + str(page_index)
     data = retrieve_html(url)
-#    print("data: \n%s" % data)
-    for url in google_url_regex.findall(data):
-      db.enqueue(url)
-    for url in google_adurl_regex.findall(data):
-      db.enqueue(url)
+#   print("data: \n%s" % data)
+    for url in yelp_url_regex.findall(data):
+
+      yelp_page = retrieve_html("http://www.yelp.com/biz/" + url)
+      if url:
+        db.enqueue(url[0])
 
 # Step 2: Crawl each of the search result
 # We search till level 2 deep
@@ -104,12 +101,10 @@ def retrieve_html(url):
   """
   req = urllib2.Request(url)
   req.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36')
-  req.add_header('cookie', """TZ=480; GOOGAPPUID=668; GoogleAccountsLocale_session=en; AdsUserLocale=en_US; __utma=1.394066841.1407358518.1415827446.1415827446.1; __utmc=1; S_adsense3-ui=s0ZLgOcog5RaSETHLJZpoQ; PREF=ID=1111111111111111:LD=en:CR=2:TM=1416615749:LM=1434746594:GM=1:S=x1isPa8cnUjlc2W_;
-  S=izeitgeist-ad-metrics=PmgbiemVSEs:quotestreamer=5IWJZk4Vlj44eOurnqEuzg:analytics-realtime-frontend=X1vAzTJD2C_bbi8t5GzzeQ:adwords-usermgmt=HUqWc0qVwhJ7BZuJO5htTA:adwords-campaignmgmt=Os5qvyUVFAI2aAE7kjjQaw:adwords-common-ui=V_icxuG5rjcbV-xq1iVOxg:adwords-navi=4jB-FRquk6Oic-o8_q8qnw:adwords-kwoptimization=bqSO0xdkmDCPnvf89kkWsQ:photos_html=TiRUmTS92HrqENqwXneGSg:grandcentral=WBfJ08PaJJtVfc91dDmbew:cloudsearch=Hw_w9PiNzvvcraZsWRXizA; GMAIL_RTT=156; HSID=Ag6g8UuxleWJ6Ln07;
-  SSID=ApO6KLdEtjnDLJ718; APISID=69P5LE8WWDBWLJ-J/ACFpDjkhE3fMwfgXb; SAPISID=z2jb76E6GXaE7Iy5/A2ZXL7XP7bThkCp4m; S=adwords-usermgmt=mKyGOHhWsCb6ePDJw6XS6A:adwords-campaignmgmt=j3WEUY85TVcHXrKnsbxo7g:adwords-common-ui=RiaYfCGdn7Q91cI2km6zIg:adwords-navi=yoMJ3re_rW26iNO8q394Vw:videobuying=gWAXWMfpbKAS4H_RHpEo9Q:adwords-kwoptimization=QlG6-2NrLrDVzb2c93Kqrw:grandcentral=zFFpW8fOaIij1ElXHoimnw; _ga=GA1.1.394066841.1407358518;
-  SID=DQAAADQCAABWjswSa4M6uc4KxaE-hmDiRzLBdL7GMSEiFQ6PlJPMEpSOxG08XvCpF0Sdul9xg-hGO30CimalLijmcRhPpG7pKOKB9XL7b0NGVvaKhsCuALeF0phoziKBgs3IdI5YZ51y9HDGudV5RNRwq3PfI19eegzlvO-qx6V2dxYjU8pWigyhMQ9kY4nZldpXv10J8gcWVpkDaSmXpsGa8G8a3sRNMcDdFKgHDxO9m5-g_ANJIne7rCIdKJCERUXhSEYe7gV-ldf8NDmA_Ksfy5Pny5SWP3oV3LgStrTqyMJtwYYujt2J9-qdkkGvoTlKnK61Ereju49mNMqQVFq2YCq3w30RPZbcy0O_HJA2kEIJCU-ne0UoAQe-6ITHPww5ZDi28wmdCZzCqkHOe-uDY6zlHU16V5nntuQuz9IUTZjOJ2z2OcYq0RB-9biZCn-DzT7-4P2qOKw_ShC8hOwugcS1uJCitZAik_q3a-hN-GW3MUxk0GZ_-tsODeS3j1M83RTH6mw8IeWYl9f5laC66Terl923vdRIeJhJhwbeiRVtWk3iWt_YwNa7L5n1sCM01YlQEWKUYbdx1lsnvDecAb6HATvptjWKnThEZDUuOB767Wh0JppQoWqFoFjELfOxVKlsf332fxgyke5EowOo9OBbY35lRHMLvq7CU-vr3VYOAW1X4Wp7VDFFDHZZC2yOqVo96Q-vFMXCFCAGN9xrkx6JDfOYLWlq5vvuym3hMq6We9JJRoaRbHJbKHQhKcNfmweHsqU;
-  NID=73=p_J06bzimh9VPmcN_jt-8VRHiUrWnhet_5ttTRGnQnyETWsyJEF_jUw3fddJuVi8KxxeiK2hBZCPwzT108ShEnezlecY3CnrnGzDGQJIzjk3CLmqaT0RQX3oKZhlopDGRNeSn5_6ckbJ9Jsw6fWemtmbys4-IEWZzudybGHbzrxoCtSkj7VYnhJ24Q6xodZ6uMVp2Z5yGcCH2LQUGXPGiydqYIey8zq5mLMWHWOm3BmVgjd817otQkrwn_-1ou0KTah3rbhBNaiL5T97vzyGoNw8TX7leXMPf530vbljyrkoC8_qx8cAYxoxDKWYfWgGNhGF9ldabyEIQo42JorbGS00qWNaVOFZiqeKVSghnM9_vdqidx_Qspm5ww_nvaPObiZ_qgNjj5tEKluwiIBgoz21HTDr8yxZ8g;
-  GOOGLE_ABUSE_EXEMPTION=ID=bae7753416360280:TM=1447712532:C=c:IP=86.5.242.71-:S=APGng0sWW4tfCWNonWtyROmYwVKbK13IqQ; DV=kq3lKI4IBRMWHttpngnuh9YsCckkogI""")
+  req.add_header('cookie', """yuv=DqmZXeB_WzCQcdJ5Zt04YMkRXZJBNu-NDKNm19REIqxsDqBrh1ha6NhaCeI33zLCbacOvFFmX-13heEi0Yy7Bw3rpr8GI3ts; bse=e6364c25ee8b29582697564ccc1478d7; hl=en_US; __qca=P0-773647723-1445386639160; fd=0; fbm_97534753161=base_domain=.yelp.com; qntcst=D%2CT; bip-iad1=sticky_web82-r8-iad1; __utmt=1; __utmt_domainTracker=1; _gat_www=1; recentlocations=Nottingham%2C+UK%3B%3BSan+Francisco%2C+CA%2C+USA%3B%3BSan+Francisco%2C+CA+94105%2C+USA;
+      location=%7B%22city%22%3A+%22Chicago%22%2C+%22zip%22%3A+%22%22%2C+%22country%22%3A+%22US%22%2C+%22address2%22%3A+%22%22%2C+%22address3%22%3A+%22%22%2C+%22state%22%3A+%22IL%22%2C+%22address1%22%3A+%22%22%2C+%22unformatted%22%3A+%22chicago%2C+il%2C+usa%22%7D; __utma=165223479.439679013.1445386638.1447694575.1447879481.4; __utmb=165223479.12.10.1447879481; __utmc=165223479; __utmz=165223479.1445386638.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided);
+      __utmv=165223479.|4=account%20level=anon=1; _ga=GA1.2.525099218A22D41D; crtg_ypus=;
+      fbsr_97534753161=VDcdlJ0c6gcrdhWicum2UxsBS8pEUyvPTM13YXIL91Q.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImNvZGUiOiJBUUF2cXRaNmROUVNDUGxXVU1sM3RpYVpyb2psSFVOby1aR01MWjdGUzhBNFJhWjVxTENkQ1A1SHh0ek5zbEpWSU9vbVNlWWV1aUZKZUkteXlNc3VKOGI1aGNDOElVSmk2MmlFb0hfczBOVWt2Qm5XYmdYcTZBYjNIVkR6Y2l1ZWJoczlXSzJWNU0yZzg5NFpzcGxETmNjOERBRmdmMzdFWUhudjZieXZlbnNqQ3NhaVJQYU5SSEd6azU0bWxXN3lqSXA1RVZlcmIzVjRXU1NBMFRYemI0QW94MWdZbC1YUzNoNEw2ZzNaN0NfdWJJcjdYNGdTcXJkaG9BT2VsX0ZYU3JZZ19ZR29hcVZKcVh6MHdMcmVKR3JmOEExM0V6NjZwSUpRX0NyNW1pcTNkZ2ZkdnpFaVdkNV9RNkdjZlJQa2g3U0RjemJ0ZEFQdVJ4MW9sZXpxbHpNRSIsImlzc3VlZF9hdCI6MTQ0Nzg3OTc4MywidXNlcl9pZCI6IjEzNjA1OTA1In0""")
 
   request = None
   status = 0
@@ -152,8 +147,12 @@ def find_emails_2_level_deep(url):
 
     link_set = find_links_in_html_with_same_hostname(url, html)
     for link in link_set:
+      if url not in link:
+        continue
       # Crawl them right away!
       # Enqueue them too
+      if 'ada.org' in link or '.edu' in link or '.gov' in link:
+        continue
       html = retrieve_html(link)
       if (html == None):
         continue
