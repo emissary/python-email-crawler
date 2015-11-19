@@ -101,31 +101,32 @@ def retrieve_html(url):
   """
   req = urllib2.Request(url)
   req.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36')
-  req.add_header('cookie', """yuv=DqmZXeB_WzCQcdJ5Zt04YMkRXZJBNu-NDKNm19REIqxsDqBrh1ha6NhaCeI33zLCbacOvFFmX-13heEi0Yy7Bw3rpr8GI3ts; bse=e6364c25ee8b29582697564ccc1478d7; hl=en_US; __qca=P0-773647723-1445386639160; fd=0; fbm_97534753161=base_domain=.yelp.com; qntcst=D%2CT; bip-iad1=sticky_web82-r8-iad1; __utmt=1; __utmt_domainTracker=1; _gat_www=1; recentlocations=Nottingham%2C+UK%3B%3BSan+Francisco%2C+CA%2C+USA%3B%3BSan+Francisco%2C+CA+94105%2C+USA;
-      location=%7B%22city%22%3A+%22Chicago%22%2C+%22zip%22%3A+%22%22%2C+%22country%22%3A+%22US%22%2C+%22address2%22%3A+%22%22%2C+%22address3%22%3A+%22%22%2C+%22state%22%3A+%22IL%22%2C+%22address1%22%3A+%22%22%2C+%22unformatted%22%3A+%22chicago%2C+il%2C+usa%22%7D; __utma=165223479.439679013.1445386638.1447694575.1447879481.4; __utmb=165223479.12.10.1447879481; __utmc=165223479; __utmz=165223479.1445386638.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided);
-      __utmv=165223479.|4=account%20level=anon=1; _ga=GA1.2.525099218A22D41D; crtg_ypus=;
-      fbsr_97534753161=VDcdlJ0c6gcrdhWicum2UxsBS8pEUyvPTM13YXIL91Q.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImNvZGUiOiJBUUF2cXRaNmROUVNDUGxXVU1sM3RpYVpyb2psSFVOby1aR01MWjdGUzhBNFJhWjVxTENkQ1A1SHh0ek5zbEpWSU9vbVNlWWV1aUZKZUkteXlNc3VKOGI1aGNDOElVSmk2MmlFb0hfczBOVWt2Qm5XYmdYcTZBYjNIVkR6Y2l1ZWJoczlXSzJWNU0yZzg5NFpzcGxETmNjOERBRmdmMzdFWUhudjZieXZlbnNqQ3NhaVJQYU5SSEd6azU0bWxXN3lqSXA1RVZlcmIzVjRXU1NBMFRYemI0QW94MWdZbC1YUzNoNEw2ZzNaN0NfdWJJcjdYNGdTcXJkaG9BT2VsX0ZYU3JZZ19ZR29hcVZKcVh6MHdMcmVKR3JmOEExM0V6NjZwSUpRX0NyNW1pcTNkZ2ZkdnpFaVdkNV9RNkdjZlJQa2g3U0RjemJ0ZEFQdVJ4MW9sZXpxbHpNRSIsImlzc3VlZF9hdCI6MTQ0Nzg3OTc4MywidXNlcl9pZCI6IjEzNjA1OTA1In0""")
+  req.add_header('cookie', """yuv=DqmZXeB_WzCQcdJ5Zt04YMkRXZJBNu-NDKNm19REIqxsDqBrh1ha6NhaCeI33zLCbacOvFFmX-13heEi0Yy7Bw3rpr8GI3ts; bse=e6364c25ee8b29582697564ccc1478d7; hl=en_US; __qca=P0-773647723-1445386639160; fd=0; fbm_97534753161=base_domain=.yelp.com; qntcst=D%2CT; bip-iad1=sticky_web82-r8-iad1; recentlocations=Manhattan%2C+NY%2C+USA%3B%3BMiami%2C+FL%2C+USA%3B%3BSan+Francisco%2C+CA%2C+USA%3B%3BChicago%2C+IL%2C+USA%3B%3BNottingham%2C+UK%3B%3BSan+Francisco%2C+CA+94105%2C+USA; location=%7B%22city%22%3A+%22Columbus%22%2C+%22zip%22%3A+%22%22%2C+%22country%22%3A+%22US%22%2C+%22address2%22%3A+%22%22%2C+%22address3%22%3A+%22%22%2C+%22state%22%3A+%22OH%22%2C+%22address1%22%3A+%22%22%2C+%22unformatted%22%3A+%22columbus%2C+OH%2C+USA%22%7D; __utmt=1; __utmt_domainTracker=1; _gat_www=1; __utma=165223479.439679013.1445386638.1447879481.1447892012.5; __utmb=165223479.4.10.1447892012; __utmc=165223479; __utmz=165223479.1445386638.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); __utmv=165223479.|4=account%20level=anon=1; _ga=GA1.2.525099218A22D41D; crtg_ypus=; fbsr_97534753161=hWijeut1ir_5GFdJID20G2X9zfkQlxEqtHllONlaBIQ.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImNvZGUiOiJBUUJ1NFVsWEw0N0dFeDN6M3B4UWw0LTBvbHNvbjVoSVhaLUhhOVFvaE03cU5lVTBIbjNGWVhCWkZVZGlYNWxKR1hKRktlZHo0bGJ5ODA5Y1gyOG1keThzU0JzR0hVd3Rud3VseTk4NE5Kc3psRXpscWlFbmZYT3N2SU5XOHlGcUFMY0Y1QTZMbC1ncmd1T2thRmNhVTBwSVV2MHFESjctMkpwRjFuNWdWa0VOMW55OXpoS3RhZTNtdnFvMi1NajU0WkV5OWphUWZMbVRLdjU2ckFmVV9PR094cTYwMDFNZkVmTjhZTU1fMURZbU83RXpFSEtNOG9WemZuZ2dvNWhBWko3cjg0ZjNfTGljbU5RYmR5Z0lhblZreXVlRVVTTWtIZEphNHRTbWxzeFNGT202b1hFN3FZTGtVTzd2TDc5SVBfSzVpRFRhOTRwQlRiNk9ZbG8xMDhQRCIsImlzc3VlZF9hdCI6MTQ0Nzg5MjQ1NywidXNlcl9pZCI6IjEzNjA1OTA1In0""")
 
   request = None
+  tries = 0
   status = 0
-  try:
-    logger.info("Crawling %s" % url)
-    request = urllib2.urlopen(req, timeout=5)
-  except urllib2.URLError, e:
-    logger.error("Exception at url: %s\n%s" % (url, e))
-  except urllib2.HTTPError, e:
-    status = e.code
-  except Exception, e:
-    return
-  if status == 0:
-    status = 200
+  while tries < 3:
+    tries = tries + 1
+    try:
+      logger.info("Crawling %s" % url)
+      request = urllib2.urlopen(req, timeout=5)
+    except urllib2.URLError, e:
+      logger.error("Exception at url: %s\n%s" % (url, e))
+    except urllib2.HTTPError, e:
+      status = e.code
+    except Exception, e:
+      continue
+    if status == 0:
+      status = 200
 
-  try:
-    data = request.read()
-  except Exception, e:
-    return
+    try:
+      data = request.read()
+    except Exception, e:
+      continue 
 
-  return str(data)
+    return str(data)
+  return ''
 
 
 def find_emails_2_level_deep(url):
@@ -201,7 +202,7 @@ def find_links_in_html_with_same_hostname(url, html):
 
   return link_set
 locations = [
-    'dallas,tx,usa',
+    #'dallas,tx,usa',
     'columbus,+OH,+USA',
     'nashville,+TN,+USA',
     'indianapolis,+IN,+USA',
