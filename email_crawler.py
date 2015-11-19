@@ -203,16 +203,11 @@ def find_links_in_html_with_same_hostname(url, html):
   return link_set
 locations = [
     #'dallas,tx,usa',
-    'columbus,+OH,+USA',
-    'nashville,+TN,+USA',
-    'indianapolis,+IN,+USA',
-    'louisville,+IN,+USA',
-    'houston,+TX,+USA',
-    'st+louis,+MO,+USA',
-    'Oklahoma+City,+OK,+USA',
-    'phoenix,+AZ,+USA',
-    'portland,+OR,+USA',
-    'tampa,FL,USA'
+'manhattan,NY',
+'philadelphia,PA',
+'san+diego,CA',
+'baltimore,MD',
+'minneapolis,MN',
     ]
 
 if __name__ == "__main__":
@@ -243,8 +238,7 @@ if __name__ == "__main__":
       logger.info("="*40)
     else:
       # Crawl the supplied keywords!
-      for l in locations:
-        crawl(l)
+      crawl(arg)
 
   except KeyboardInterrupt:
     logger.error("Stopping (KeyboardInterrupt)")
